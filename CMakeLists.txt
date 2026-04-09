@@ -55,7 +55,8 @@ add_library( freertos_config INTERFACE )
 target_include_directories( freertos_config
     INTERFACE
         ./
-        ./Trace_Recorder_Configuration
+        ./config
+        ./config/Trace_Recorder_Configuration
         ${FREERTOS_PLUS_TRACE_PATH}/include
         ${FREERTOS_PLUS_TRACE_PATH}/kernelports/FreeRTOS/include
 )
@@ -78,12 +79,12 @@ target_compile_options( freertos_kernel
 file( GLOB FREERTOS_PLUS_TRACE_SOURCES ${FREERTOS_PLUS_TRACE_PATH}/*.c ${FREERTOS_PLUS_TRACE_PATH}/kernelports/FreeRTOS/*.c )
 
 add_executable( posix_demo
-                code_coverage_additions.c
-                console.c
-                main.c
-                main_blinky.c
-                main_full.c
-                run-time-stats-utils.c
+                src/code_coverage_additions.c
+                src/console.c
+                src/main.c
+                src/main_blinky.c
+                src/main_full.c
+                src/run-time-stats-utils.c
                 $<$<NOT:${NO_TRACING}>:${FREERTOS_PLUS_TRACE_SOURCES}>
                 ${CMAKE_CURRENT_LIST_DIR}/../Common/Minimal/AbortDelay.c
                 ${CMAKE_CURRENT_LIST_DIR}/../Common/Minimal/BlockQ.c
@@ -115,6 +116,8 @@ add_executable( posix_demo
 target_include_directories( posix_demo
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/src
+        ${CMAKE_CURRENT_LIST_DIR}/config
         ${CMAKE_CURRENT_LIST_DIR}/../Common/include
         ${FREERTOS_PLUS_TRACE_PATH}/Include
         ${FREERTOS_PLUS_TRACE_PATH}/streamports/File/include

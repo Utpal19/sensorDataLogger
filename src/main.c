@@ -41,13 +41,13 @@ static void vSensorTask(void *pvParameters)
         printf("TimeStamp: %lu\tADC Val: %.5f\n", 
                 ADC_Sensor.timestamp, ADC_Sensor.sensorVal);
         fflush(stdout);
-        if(xQueueSend(xMyQueue, &ADC_sensor, pdMS_TO_TICKS(100)) != pdPASS)
+        if(xQueueSend(xMyQueue, &ADC_Sensor, portMAX_DELAY) != pdPASS)
         {
             //Data Send unSuccessfully
             printf("Data Send unSuccessfully\n");
             fflush(stdout);
         }
-        // vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
+        vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
     }
 }
 
