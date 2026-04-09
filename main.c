@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 
 /* Required by configASSERT in FreeRTOSConfig.h */
 void vAssertCalled( const char * const pcFileName, unsigned long ulLine )
@@ -17,10 +18,13 @@ unsigned long ulGetRunTimeCounterValue( void ) { return 0; }
 //-------------------------------------------------------------------------//
 
 
-// TaskHandle_t 
+TaskHandle_t xSensorTaskHandle;
+QueueHandle_t xMyQueue = NULL;
 
-
-
+typedef struct SensorRead{
+    float sensorVal;
+    TickType_t timestamp;
+}SensorRead_t;
 
 
 /* A simple task that prints a message every second */
@@ -28,12 +32,22 @@ static void vSensorTask(void *pvParameters)
 {
     (void)pvParameters;  /* unused */
     int count = 0;
+    SensorRead_t ADC_Sensor;
     
     for (;;)
     {
-        printf("*Hello from task! count = %d*\n", count++);
+        ADC_Sensor.sensorVal = 13 * (rand()%77)/10.03;
+        ADC_Sensor.timestamp = xTaskGetTickCount();
+        printf("TimeStamp: %lu\tADC Val: %.5f\n", 
+                ADC_Sensor.timestamp, ADC_Sensor.sensorVal);
         fflush(stdout);
-        vTaskDelay(pdMS_TO_TICKS(500));  /* sleep 500 mili second */
+        if(xQueueSend(xMyQueue, &ADC_sensor, pdMS_TO_TICKS(100)) != pdPASS)
+        {
+            //Data Send unSuccessfully
+            printf("Data Send unSuccessfully\n");
+            fflush(stdout);
+        }
+        // vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
     }
 }
 
@@ -41,15 +55,20 @@ int main(void)
 {
     printf("Starting FreeRTOS scheduler...\n");
     fflush(stdout);
+
+    BaseType_t status;
+    xMyQueue = xQueueCreate(10, sizeof(SensorRead_t));
+    configASSERT(xMyQueue != NULL);
     
     /* Create one task */
-    xTaskCreate(vSensorTask, 
+    status = xTaskCreate(vSensorTask, 
         "Sensor-Task",
         200,
         NULL,
         4,
-        NULL
+        &xSensorTaskHandle
     );
+    configASSERT(status ==pdPASS);
     
     /* Start the scheduler - this does not return */
     vTaskStartScheduler();
