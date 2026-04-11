@@ -5,7 +5,9 @@
 #include "task.h"
 #include "queue.h"
 
-#include "../inc/sensor_task.h"
+#include "../inc/sensor_data.h"
+#include "../inc/logger_task.h"
+#include "../inc/extern.h"
 
 
 /* Required by configASSERT in FreeRTOSConfig.h */
@@ -32,6 +34,7 @@ uint32_t uiTraceTimerGetValue( void )     { return ( uint32_t )( ( prvGetNs() - 
 
 
 TaskHandle_t xSensorTaskHandle;
+TaskHandle_t xLoggerTaskHandle;
 QueueHandle_t xMyQueue = NULL;
 
 
@@ -45,8 +48,8 @@ int main(void)
     fflush(stdout);
 
     BaseType_t status;
-    // xMyQueue = xQueueCreate(10, sizeof(SensorReadh_t));
-    // configASSERT(xMyQueue != NULL);
+    xMyQueue = xQueueCreate(10, sizeof(SensorRead_t));
+    configASSERT(xMyQueue != NULL);
     
     /* Create one task */
     status = xTaskCreate(vSensorTask, 
@@ -57,6 +60,15 @@ int main(void)
         &xSensorTaskHandle
     );
     configASSERT(status ==pdPASS);
+
+    xTaskCreate(vLoggerTask, 
+        "Logger-Task",
+        200,
+        NULL,
+        3,
+        &xLoggerTaskHandle
+    );
+    configASSERT(status == pdPASS);
     
     /* Start the scheduler - this does not return */
     vTaskStartScheduler();
