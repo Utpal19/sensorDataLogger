@@ -27,7 +27,7 @@ INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/strea
 INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/kernelports/FreeRTOS/include
 INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/kernelports/FreeRTOS/
 
-SOURCE_FILES          := src/main.c
+SOURCE_FILES          := $(wildcard src/*.c)
 SOURCE_FILES          += $(wildcard ${FREERTOS_DIR}/Source/*.c)
 # Memory manager (use malloc() / free() )
 SOURCE_FILES          += ${KERNEL_DIR}/portable/MemMang/heap_3.c

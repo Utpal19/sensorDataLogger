@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+
+#include "../inc/sensor_task.h"
+
 
 /* Required by configASSERT in FreeRTOSConfig.h */
 void vAssertCalled( const char * const pcFileName, unsigned long ulLine )
@@ -11,54 +15,38 @@ void vAssertCalled( const char * const pcFileName, unsigned long ulLine )
     abort();
 }
 
-/* Required by configGENERATE_RUN_TIME_STATS in FreeRTOSConfig.h */
-void vConfigureTimerForRunTimeStats( void ) { }
-unsigned long ulGetRunTimeCounterValue( void ) { return 0; }
-//-------------------------------------------------------------------------//
-//-------------------------------------------------------------------------//
+/* Required by TRC_HARDWARE_PORT_Win32 in trcHardwarePort.h.
+ * Use clock_gettime so these are safe to call before the scheduler starts. */
+static uint64_t ullTraceEntryNs = 0U;
+static uint64_t prvGetNs( void )
+{
+    struct timespec ts;
+    clock_gettime( CLOCK_MONOTONIC, &ts );
+    return ( uint64_t ) ts.tv_sec * 1000000000ULL + ( uint64_t ) ts.tv_nsec;
+}
+void vTraceTimerReset( void )             { ullTraceEntryNs = prvGetNs(); }
+uint32_t uiTraceTimerGetFrequency( void ) { return 1000000U; /* 1 MHz — report in microseconds */ }
+uint32_t uiTraceTimerGetValue( void )     { return ( uint32_t )( ( prvGetNs() - ullTraceEntryNs ) / 1000U ); }
+//-------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------------------------------------//
 
 
 TaskHandle_t xSensorTaskHandle;
 QueueHandle_t xMyQueue = NULL;
 
-typedef struct SensorRead{
-    float sensorVal;
-    TickType_t timestamp;
-}SensorRead_t;
-
-
-/* A simple task that prints a message every second */
-static void vSensorTask(void *pvParameters)
-{
-    (void)pvParameters;  /* unused */
-    int count = 0;
-    SensorRead_t ADC_Sensor;
-    
-    for (;;)
-    {
-        ADC_Sensor.sensorVal = 13 * (rand()%77)/10.03;
-        ADC_Sensor.timestamp = xTaskGetTickCount();
-        printf("TimeStamp: %lu\tADC Val: %.5f\n", 
-                ADC_Sensor.timestamp, ADC_Sensor.sensorVal);
-        fflush(stdout);
-        if(xQueueSend(xMyQueue, &ADC_Sensor, portMAX_DELAY) != pdPASS)
-        {
-            //Data Send unSuccessfully
-            printf("Data Send unSuccessfully\n");
-            fflush(stdout);
-        }
-        vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
-    }
-}
 
 int main(void)
 {
+#if ( projENABLE_TRACING == 1 )
+    vTraceEnable( TRC_START );
+#endif
+
     printf("Starting FreeRTOS scheduler...\n");
     fflush(stdout);
 
     BaseType_t status;
-    xMyQueue = xQueueCreate(10, sizeof(SensorRead_t));
-    configASSERT(xMyQueue != NULL);
+    // xMyQueue = xQueueCreate(10, sizeof(SensorReadh_t));
+    // configASSERT(xMyQueue != NULL);
     
     /* Create one task */
     status = xTaskCreate(vSensorTask, 
@@ -83,8 +71,8 @@ int main(void)
 
 
 
-//-------------------------------------------------------------------------//
-//-------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------------------------------------//
 /* FreeRTOS hooks - required by the kernel, can be empty */
 void vApplicationMallocFailedHook(void) { for(;;); }
 void vApplicationIdleHook(void) { }
