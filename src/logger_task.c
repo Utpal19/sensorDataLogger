@@ -7,6 +7,17 @@
 #include "../inc/logger_task.h"
 #include "../inc/extern.h"
 
+
+typedef struct Node{
+    SensorRead_t sPkt;
+    struct Node *next;
+}Node;
+
+Node *head = NULL;
+
+
+
+
 void vLoggerTask(void *pvParameters)
 {
     while(1)

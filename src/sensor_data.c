@@ -14,6 +14,7 @@ uint32_t g_drop_count = 0;
 void vSensorTask(void *pvParameters)
 {
     (void)pvParameters;  /* unused */
+    TickType_t xLastWakeTime = xTaskGetTickCount();
     int count = 0;
     SensorRead_t ADC_Sensor;
     
@@ -31,6 +32,7 @@ void vSensorTask(void *pvParameters)
             fflush(stdout);
             g_drop_count++;
         }
-        vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
+        // vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
+        vTaskDelayUntil(&xLastWakeTime, 100);
     }
 }
