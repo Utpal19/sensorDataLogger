@@ -21,4 +21,6 @@
         }
     },
     "terminal.integrated.defaultProfile.windows": "MSYS2",
+    "editor.inlineSuggest.enabled": false,
+    "github.copilot.editor.enableAutoCompletions": false
 }

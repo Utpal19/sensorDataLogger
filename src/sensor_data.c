@@ -22,17 +22,17 @@ void vSensorTask(void *pvParameters)
     {
         ADC_Sensor.sensorVal = 13.0f * (rand()%77)/10.03;
         ADC_Sensor.timestamp = xTaskGetTickCount();
-        printf("TimeStamp: %lu\tADC Val: %.5f\n", 
-                ADC_Sensor.timestamp, ADC_Sensor.sensorVal);
-        fflush(stdout);
+        // debug_log(LOG_INFO, "t-stamp: %lu\ts_val: %.5f",
+        //             ADC_Sensor.timestamp, ADC_Sensor.sensorVal);
         if(xQueueSend(xMyQueue, &ADC_Sensor, ( TickType_t ) 0) != pdPASS)
         {
             //Data Send unSuccessfully
-            printf("Data Send unSuccessfully\n");
-            fflush(stdout);
             g_drop_count++;
+            if(g_drop_count % 10)
+            {
+                debug_log(LOG_WARN, "vSensorTask sent unSuccessfull");
+            }
         }
-        // vTaskDelay(pdMS_TO_TICKS(100)); // Sleep 100 ms //
         vTaskDelayUntil(&xLastWakeTime, 100);
     }
 }

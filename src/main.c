@@ -1,3 +1,8 @@
+/*
+* We can use this make command also to make this project: 
+* make NO_TRACING=1
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -7,6 +12,7 @@
 
 #include "../inc/sensor_data.h"
 #include "../inc/logger_task.h"
+#include "../inc/debug_task.h"
 #include "../inc/extern.h"
 
 
@@ -33,9 +39,16 @@ uint32_t uiTraceTimerGetValue( void )     { return ( uint32_t )( ( prvGetNs() - 
 //-------------------------------------------------------------------------------------------------------------//
 
 
+LogLevel_t g_log_level = LOG_INFO;
+
 TaskHandle_t xSensorTaskHandle;
 TaskHandle_t xLoggerTaskHandle;
+TaskHandle_t xDebugTaskHandle;
+
 QueueHandle_t xMyQueue = NULL;
+QueueHandle_t xPrintQueue = NULL;
+
+#define PRINT_QUEUE_LEN 10
 
 
 int main(void)
@@ -48,9 +61,13 @@ int main(void)
     fflush(stdout);
 
     BaseType_t status;
+
     xMyQueue = xQueueCreate(10, sizeof(SensorRead_t));
     configASSERT(xMyQueue != NULL);
     
+    xPrintQueue = xQueueCreate(PRINT_QUEUE_LEN, sizeof(print_msg_t));
+    configASSERT(xPrintQueue != NULL);
+
     /* Create one task */
     status = xTaskCreate(vSensorTask, 
         "Sensor-Task",
@@ -66,6 +83,15 @@ int main(void)
         200,
         NULL,
         3,
+        &xLoggerTaskHandle
+    );
+    configASSERT(status == pdPASS);
+
+    xTaskCreate(vDebugTask, 
+        "Debug-Task",
+        200,
+        NULL,
+        1,
         &xLoggerTaskHandle
     );
     configASSERT(status == pdPASS);
