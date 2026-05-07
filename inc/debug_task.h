@@ -20,4 +20,5 @@ typedef struct{
 
 
 void debug_log(LogLevel_t lvl, const char *fmt, ...);
+void vPrintRTOSStats(void);
 void vDebugTask(void *pvParameter);

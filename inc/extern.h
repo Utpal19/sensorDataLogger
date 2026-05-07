@@ -8,6 +8,7 @@
 
 
 extern uint32_t g_drop_count;
+extern uint32_t g_print_drop_count;
 extern QueueHandle_t xMyQueue;
 extern QueueHandle_t xPrintQueue;
 

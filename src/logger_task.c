@@ -21,32 +21,27 @@ void appendNode(void *data)
     static uint8_t nodeCount = 0;
     LogNode *currentNode;
     LogNode *temp = (LogNode*) pvPortMalloc(sizeof(LogNode));
+    if(temp == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
     temp->data = *(SensorRead_t*)data;
     temp->next = NULL;
 
-    if (head == NULL) {
-        head = temp;
-        nodeCount++;
-        return;
-    }
-    currentNode = head;
-
-    if(nodeCount == 100)
+    if(head == NULL)
     {
-        temp->next = currentNode->next;
         head = temp;
-        nodeCount--;
-        debug_log(LOG_INFO, "*** Replaced head node ***\r\n");
     }
-    else if(nodeCount < 100)
+    else
     {
+        currentNode = head;
         while(currentNode->next != NULL)
         {
             currentNode = currentNode->next;
         }
         currentNode->next = temp;
-        nodeCount++;
-    }   
+    }
+        
 }
 
 void vLoggerTask(void *pvParameters)
@@ -59,7 +54,7 @@ void vLoggerTask(void *pvParameters)
             // Process the received data (e.g., log it to a file or print it)
             // debug_log(LOG_INFO, "** TimeStamp: %lu\tADC Val: %.5f **",
             //         receivedData.timestamp, receivedData.sensorVal);
-            // appendNode(&receivedData);
+            appendNode(&receivedData);
         }
         else
         {

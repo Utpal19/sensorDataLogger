@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/utpal/C-Dev/freeRtosOnLinux/FreeRTOS/FreeRTOS-Plus/Source/FreeRTOS-Plus-Trace/streamports/**)",
+      "Read(//home/utpal/C-Dev/freeRtosOnLinux/FreeRTOS/FreeRTOS-Plus/Source/FreeRTOS-Plus-Trace/**)",
+      "Read(//home/utpal/C-Dev/freeRtosOnLinux/**)",
+      "Read(//tmp/**)",
+      "Bash(make clean *)",
+      "Bash(make NO_TRACING=0)",
+      "Bash(timeout 5 ./build/posix_demo)",
+      "Bash(make NO_TRACING=1)",
+      "Read(//home/utpal/Tracealyzer-4.11.1-linux-standalone-x86-64/**)",
+      "Bash(gdb --version)"
+    ]
+  }
+}

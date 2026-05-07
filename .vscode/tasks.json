@@ -4,14 +4,21 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build Posix Demo",
+            "label": "Build Posix Demo (Debug)",
             "type": "shell",
-            "command": "make",
+            "command": "make DEBUG=1",
             "problemMatcher": "$gcc",
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Build Posix Demo (Release)",
+            "type": "shell",
+            "command": "make",
+            "problemMatcher": "$gcc",
+            "group": "build"
         }
     ]
 }

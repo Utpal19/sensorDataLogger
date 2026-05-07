@@ -26,6 +26,7 @@ INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/strea
 INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/streamports/File/config
 INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/kernelports/FreeRTOS/include
 INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/kernelports/FreeRTOS/
+INCLUDE_DIRS          += -I${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/kernelports/FreeRTOS/config
 
 SOURCE_FILES          := $(wildcard src/*.c)
 SOURCE_FILES          += $(wildcard ${FREERTOS_DIR}/Source/*.c)
@@ -57,9 +58,13 @@ else
     CPPFLAGS              += -DprojENABLE_TRACING=0
   else
     CPPFLAGS              += -DprojENABLE_TRACING=1
+    # trcStreamPort.c uses errno but omits <errno.h> — inject it via compiler flag
+    CPPFLAGS              += -include errno.h
     # Trace Library.
     SOURCE_FILES          += ${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/kernelports/FreeRTOS/trcKernelPort.c
     SOURCE_FILES          += $(wildcard ${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/*.c )
+    # Stream port (File backend — writes trace.psf to working directory)
+    SOURCE_FILES          += ${FREERTOS_PLUS_DIR}/Source/FreeRTOS-Plus-Trace/streamports/File/trcStreamPort.c
   endif
   CPPFLAGS              += -DprojCOVERAGE_TEST=0
 endif
@@ -67,6 +72,9 @@ endif
 ifdef PROFILE
   CFLAGS              +=   -pg  -O0
   LDFLAGS             +=   -pg  -O0
+else ifdef DEBUG
+  CFLAGS              +=   -Og
+  LDFLAGS             +=   -Og
 else
   CFLAGS              +=   -O3
   LDFLAGS             +=   -O3

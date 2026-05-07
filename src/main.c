@@ -48,7 +48,7 @@ TaskHandle_t xDebugTaskHandle;
 QueueHandle_t xMyQueue = NULL;
 QueueHandle_t xPrintQueue = NULL;
 
-#define PRINT_QUEUE_LEN 10
+/* PRINT_QUEUE_LEN is defined in debug_task.h */
 
 
 int main(void)
