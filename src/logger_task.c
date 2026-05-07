@@ -18,8 +18,8 @@ LogNode *head = NULL;
 
 void appendNode(void *data)
 {
-    uint8_t nodeCount = 1;
-    LogNode *currentNode;
+    static uint8_t nodeCount = 0;
+    LogNode *tail, *temp_head;
     LogNode *temp = (LogNode*) pvPortMalloc(sizeof(LogNode));
     if(temp == NULL)
     {
@@ -31,18 +31,25 @@ void appendNode(void *data)
     if(head == NULL)
     {
         head = temp;
+        nodeCount++;
     }
     else
     {
-        currentNode = head;
-        while(currentNode->next != NULL)
+        tail = head;
+        while(tail->next != NULL)
         {
-            currentNode = currentNode->next;
-            nodeCount++;
+            tail = tail->next;
         }
-        currentNode->next = temp;
+        tail->next = temp;
         nodeCount++;
-        debug_log(LOG_INFO, "nodeCount: %d", nodeCount);
+        // debug_log(LOG_INFO, "nodeCount: %d", nodeCount);
+    }
+    while(nodeCount >= (NODE_POOL_LEN+1))
+    {
+        temp_head = head;
+        head = head->next;
+        vPortFree(temp_head);
+        nodeCount--;
     }
         
 }
