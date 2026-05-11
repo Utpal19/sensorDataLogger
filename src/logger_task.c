@@ -82,10 +82,12 @@ void vLoggerTask(void *pvParameters)
 
 uint8_t getLogSnapshot(SensorRead_t *buf, uint8_t bufLen)
 {
-    uint8_t count = 0;    
+    uint8_t count = 0;
+    
     xSemaphoreTake(xListMutex, portMAX_DELAY);
     LogNode *cur = head;
-    while(cur->next != NULL && count <= bufLen)
+    // while(cur->next != NULL && count <= bufLen)
+    while(cur != NULL && count <= bufLen)
     {
         buf[count++] = cur->data;
         cur = cur->next;

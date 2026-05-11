@@ -3,3 +3,4 @@ build/
 FreeRTOS/
 src/FreeRTOS
 src/FreeRTOS-Plus
+trace.psf

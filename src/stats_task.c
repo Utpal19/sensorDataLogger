@@ -13,6 +13,9 @@ void vStatsTask(void *pvParmaeter)
     float avg_val = 0, min_val = 0, max_val = 0;
     while(1)
     {
+        len = 0;
+        avg_val = 0;
+
         count = getLogSnapshot(&s_val[0], NODE_POOL_LEN);
         if(len == 0)
         {
@@ -32,7 +35,7 @@ void vStatsTask(void *pvParmaeter)
                 count, avg_val, min_val, max_val);
 
         // compute stats on snapshot[]...
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 
 
