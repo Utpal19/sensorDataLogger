@@ -8,11 +8,13 @@
 #include <time.h>
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
 #include "queue.h"
 
 #include "../inc/sensor_data.h"
 #include "../inc/logger_task.h"
 #include "../inc/debug_task.h"
+#include "../inc/stats_task.h"
 #include "../inc/extern.h"
 
 
@@ -44,9 +46,12 @@ LogLevel_t g_log_level = LOG_INFO;
 TaskHandle_t xSensorTaskHandle;
 TaskHandle_t xLoggerTaskHandle;
 TaskHandle_t xDebugTaskHandle;
+TaskHandle_t xStatsTaskHandle;
 
 QueueHandle_t xMyQueue = NULL;
 QueueHandle_t xPrintQueue = NULL;
+
+SemaphoreHandle_t xListMutex;
 
 /* PRINT_QUEUE_LEN is defined in debug_task.h */
 
@@ -61,6 +66,9 @@ int main(void)
     fflush(stdout);
 
     BaseType_t status;
+
+    xListMutex = xSemaphoreCreateMutex();
+    configASSERT(xListMutex != NULL);       
 
     xMyQueue = xQueueCreate(10, sizeof(SensorRead_t));
     configASSERT(xMyQueue != NULL);
@@ -95,6 +103,14 @@ int main(void)
         &xLoggerTaskHandle
     );
     configASSERT(status == pdPASS);
+
+    xTaskCreate(vStatsTask,
+            "Stats-Task",
+            200,
+            NULL,
+            2,
+            &xStatsTaskHandle
+    );
     
     /* Start the scheduler - this does not return */
     vTaskStartScheduler();

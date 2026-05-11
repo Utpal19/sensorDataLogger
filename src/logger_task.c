@@ -28,6 +28,8 @@ void appendNode(void *data)
     temp->data = *(SensorRead_t*)data;
     temp->next = NULL;
 
+    // Mutex only around pointer manipulation
+    xSemaphoreTake(xListMutex, portMAX_DELAY);
     if(head == NULL)
     {
         head = temp;
@@ -48,10 +50,14 @@ void appendNode(void *data)
     {
         temp_head = head;
         head = head->next;
-        vPortFree(temp_head);
+        xSemaphoreGive(xListMutex);
+        vPortFree(temp_head);   // free OUTSIDE mutex
+        xSemaphoreTake(xListMutex, portMAX_DELAY);
         nodeCount--;
     }
+    xSemaphoreGive(xListMutex);
         
+
 }
 
 void vLoggerTask(void *pvParameters)
@@ -71,4 +77,20 @@ void vLoggerTask(void *pvParameters)
             debug_log(LOG_WARN, "vLoggerTask Queue rcv failed");
         }
     }
+}
+
+
+uint8_t getLogSnapshot(SensorRead_t *buf, uint8_t bufLen)
+{
+    uint8_t count = 0;    
+    xSemaphoreTake(xListMutex, portMAX_DELAY);
+    LogNode *cur = head;
+    while(cur->next != NULL && count <= bufLen)
+    {
+        buf[count++] = cur->data;
+        cur = cur->next;
+    }
+    xSemaphoreGive(xListMutex);
+    
+    return count;
 }
